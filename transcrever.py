@@ -88,3 +88,4 @@ if __name__ == "__main__":
             
         except Exception as e:
             print(f"\n❌ Erro ao salvar o arquivo de transcrição: {e}")
+            #teste
