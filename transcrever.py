@@ -4,10 +4,7 @@ import os  # Biblioteca para manipulação de arquivos e diretórios
 from datetime import datetime  # Biblioteca para manipulação de datas
 
 def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
-    """
-    Transcreve um áudio usando a GPU NVIDIA com o Whisper, com otimizações
-    para evitar saídas repetitivas e de baixa qualidade.
-    """
+    # Função para transcrever áudio usando Whisper com suporte a GPU NVIDIA
     print("Iniciando transcrição com GPU NVIDIA...")
     
     device = "cpu"  # Inicia com fallback para CPU
@@ -16,7 +13,7 @@ def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
         print("GPU detectada. Usando CUDA.")
         device = "cuda"
     else:
-        print("GPU NVIDIA não encontrada. Usando CPU.")
+        print("GPU NVIDIA não encontrada. Usando CPU.") 
 
     try:
         # Carrega o modelo no dispositivo detectado (GPU ou CPU)
@@ -24,11 +21,11 @@ def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
         
         # Configurações otimizadas para evitar repetição
         resultado = model.transcribe(
-            audio_path,
+            audio_path, 
             fp16=torch.cuda.is_available(),  # Usa fp16 apenas se CUDA estiver disponível
             language="pt",                   # Força português para melhor acurácia
             
-            # --- PRINCIPAIS MUDANÇAS AQUI ---
+            # Parâmetros para evitar repetições e melhorar a qualidade
             # Fornece uma lista de temperaturas. O Whisper tentará cada uma
             # até encontrar uma que passe nos testes de compressão e probabilidade.
             temperature=(0.0, 0.2, 0.4, 0.6, 0.8),
@@ -38,8 +35,6 @@ def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
             
             # Limiar para a probabilidade média dos tokens. Evita frases com baixa confiança.
             logprob_threshold=-0.8,
-            
-            # --- FIM DAS MUDANÇAS ---
             
             best_of=5,                      # Aumentado para mais robustez
             verbose=True,                   # Mostra detalhes da transcrição
@@ -52,7 +47,7 @@ def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
         print(f"Ocorreu um erro durante a transcrição: {e}")
         return {"text": f"Erro na transcrição: {e}"}
 
-# --- BLOCO PRINCIPAL (USO PRÁTICO) ---
+# Exemplo de uso
 if __name__ == "__main__":
     # Configurações
     arquivo_audio = "testeM.mp3"  # Caminho do seu arquivo de áudio
@@ -65,27 +60,25 @@ if __name__ == "__main__":
     texto_transcrito = resultado.get("text", "").strip()
 
     # Exibe os resultados
-    print("\n" + "="*50)
-    print("📄 TEXTO TRANSCRITO:")
-    print("="*50)
-    if texto_transcrito:
-        print(texto_transcrito)
-    else:
-        print("Nenhum texto foi transcrito ou ocorreu um erro.")
+    print("\n" + "="*50) # Separador visual
+    print("📄 TEXTO TRANSCRITO:") # Separador visual
+    print("="*50) # Separador visual
+    if texto_transcrito: # Verifica se há texto transcrito
+        print(texto_transcrito) # Exibe o texto transcrito
+    else: # Caso contrário, informa que não há texto
+        print("Nenhum texto foi transcrito ou ocorreu um erro.") # Mensagem de erro
         
-    # --- LÓGICA DE SALVAMENTO SIMPLIFICADA ---
     # Salva a transcrição em um arquivo de texto se houver conteúdo
     if texto_transcrito:
         try:
             # Cria um nome de arquivo com base na data e hora atuais para ser único
-            data_atual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            nome_arquivo = f"transcricao_{data_atual}.txt"
-            
-            with open(nome_arquivo, "w", encoding="utf-8") as f:
-                f.write(texto_transcrito)
+            data_atual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # Formato: YYYY-MM-DD_HH-MM-SS
+            nome_arquivo = f"transcricao_{data_atual}.txt" # Nome do arquivo
+            # Salva o texto transcrito em um arquivo de texto
+            with open(nome_arquivo, "w", encoding="utf-8") as f: # Abre o arquivo para escrita
+                f.write(texto_transcrito) # Escreve o texto no arquivo
                 
-            print(f"\n✅ Transcrição salva com sucesso no arquivo: {nome_arquivo}")
+            print(f"\n✅ Transcrição salva com sucesso no arquivo: {nome_arquivo}") # Mensagem de sucesso
             
-        except Exception as e:
-            print(f"\n❌ Erro ao salvar o arquivo de transcrição: {e}")
-            #teste
+        except Exception as e: # Captura erros ao salvar o arquivo
+            print(f"\n❌ Erro ao salvar o arquivo de transcrição: {e}") # Mensagem de erro ao salvar
