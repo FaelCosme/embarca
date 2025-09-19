@@ -50,7 +50,7 @@ def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
 # Exemplo de uso
 if __name__ == "__main__":
     # Configurações
-    arquivo_audio = "testeM.mp3"  # Caminho do seu arquivo de áudio
+    arquivo_audio = "testeWebcam.mp3"  # Caminho do seu arquivo de áudio
     modelo = "base"               # Tamanho do modelo: tiny, base, small, medium, large
     
     # Executa a transcrição
