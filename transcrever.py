@@ -88,24 +88,46 @@ import whisper
 import torch
 import os
 import subprocess
+import requests
 from datetime import datetime
 
-# Função: pega o último arquivo baixado na pasta Downloads
-def pegar_ultimo_downloads():
-    pasta_downloads = os.path.join(os.path.expanduser("~"), "Downloads")
-    arquivos = [os.path.join(pasta_downloads, f) for f in os.listdir(pasta_downloads)]
-    arquivos = [f for f in arquivos if os.path.isfile(f)]
-    if not arquivos:
+# URL do servidor no Raspberry Pi (ajuste o IP e porta conforme necessário)
+URL_SERVIDOR = "http://192.168.1.239:8080"  # exemplo
+
+# Função: baixa automaticamente o arquivo do servidor
+def baixar_arquivo(url, destino="download_raspberry"):
+    try:
+        print(f"⬇️ Iniciando download do servidor: {url}")
+        resposta = requests.get(url, stream=True)
+
+        if resposta.status_code != 200:
+            print(f"❌ Erro ao conectar no servidor: {resposta.status_code}")
+            return None
+
+        # Nome do arquivo
+        nome_arquivo = destino
+        if "content-disposition" in resposta.headers:
+            # Se o servidor enviar cabeçalho com nome
+            nome_arquivo = resposta.headers["content-disposition"].split("filename=")[-1].strip('"')
+
+        with open(nome_arquivo, "wb") as f:
+            for chunk in resposta.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        print(f"✅ Download concluído: {nome_arquivo}")
+        return nome_arquivo
+    except Exception as e:
+        print(f"❌ Erro durante o download: {e}")
         return None
-    return max(arquivos, key=os.path.getctime)
 
 # Função: converte vídeo em áudio MP3 usando ffmpeg
 def converter_para_mp3(caminho_arquivo): 
-    nome_base, _ = os.path.splitext(caminho_arquivo) # Remove a extensão original
-    caminho_mp3 = nome_base + ".mp3" # Define o novo caminho com extensão .mp3
+    nome_base, _ = os.path.splitext(caminho_arquivo)
+    caminho_mp3 = nome_base + ".mp3"
     try:
         subprocess.run(
-            ["ffmpeg", "-y", "-i", caminho_arquivo, "-vn", "-acodec", "mp3", caminho_mp3], # Comando ffmpeg para conversão
+            ["ffmpeg", "-y", "-i", caminho_arquivo, "-vn", "-acodec", "mp3", caminho_mp3],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
@@ -116,7 +138,7 @@ def converter_para_mp3(caminho_arquivo):
         print(f"❌ Erro ao converter o arquivo: {e}")
         return None
 
-# Função para transcrever áudio usando Whisper com suporte a GPU NVIDIA
+# Função para transcrever áudio usando Whisper com GPU NVIDIA
 def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
     print("Iniciando transcrição com GPU NVIDIA...")
 
@@ -149,11 +171,10 @@ def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
 
 
 if __name__ == "__main__":
-    arquivo = pegar_ultimo_downloads() # Pega o último arquivo da pasta Downloads
-    
-    if arquivo:
-        print(f"📂 Último arquivo encontrado: {arquivo}") 
+    # Faz o download automático do servidor Raspberry Pi
+    arquivo = baixar_arquivo(URL_SERVIDOR)
 
+    if arquivo:
         # Extensões aceitas diretamente
         extensoes_audio = [".mp3", ".wav", ".m4a", ".ogg"]
         _, ext = os.path.splitext(arquivo)
@@ -187,4 +208,4 @@ if __name__ == "__main__":
         else:
             print("❌ Não foi possível processar o arquivo.")
     else:
-        print("❌ Nenhum arquivo encontrado na pasta Downloads.")
+        print("❌ Download não realizado.")
