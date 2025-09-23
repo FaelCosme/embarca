@@ -84,15 +84,16 @@
 #             print(f"\n❌ Erro ao salvar o arquivo de transcrição: {e}") # Mensagem de erro ao salvar
 
 # códido do chatgpt para pegar o ultimo arquivo da pasta downloads.
-import whisper
-import torch
-import os
-import subprocess
-import requests
-from datetime import datetime
+
+import whisper # Biblioteca para transcrição de áudio
+import torch # Biblioteca para computação em GPU
+import os # Biblioteca para manipulação de arquivos e diretórios
+import subprocess # Biblioteca para executar comandos do sistema
+import requests # Biblioteca para fazer requisições HTTP
+from datetime import datetime # Biblioteca para manipulação de datas
 
 # URL do servidor no Raspberry Pi (ajuste o IP e porta conforme necessário)
-URL_SERVIDOR = "http://192.168.1.239:8080"  # exemplo
+URL_SERVIDOR = "http://192.168.1.239:8080"  # Exemplo: "http://<IP_DO_RASPBERRY>:8080"
 
 # Função: baixa automaticamente o arquivo do servidor
 def baixar_arquivo(url, destino="download_raspberry"):
@@ -100,7 +101,7 @@ def baixar_arquivo(url, destino="download_raspberry"):
         print(f"⬇️ Iniciando download do servidor: {url}")
         resposta = requests.get(url, stream=True)
 
-        if resposta.status_code != 200:
+        if resposta.status_code != 200: 
             print(f"❌ Erro ao conectar no servidor: {resposta.status_code}")
             return None
 
