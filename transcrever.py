@@ -18,25 +18,25 @@ def baixar_arquivo(url, destino="download_raspberry"):
             print(f"❌ Erro ao conectar no servidor: {resposta.status_code}")
             return None
 
-        # Criar pasta "downloads" se não existir
-        pasta_destino = "downloads"
-        os.makedirs(pasta_destino, exist_ok=True)
+        # Criar pasta "downloadsRasp" se não existir
+        pasta_destino = "downloadsRasp" # Pasta para salvar os downloads
+        os.makedirs(pasta_destino, exist_ok=True) # Cria a pasta se não existir
 
         # Nome base do arquivo
-        nome_arquivo = destino
+        nome_arquivo = destino 
         if "content-disposition" in resposta.headers:
             # Se o servidor enviar cabeçalho com nome
             nome_arquivo = resposta.headers["content-disposition"].split("filename=")[-1].strip('"')
 
         # Adiciona data e hora ao nome do arquivo
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        base, ext = os.path.splitext(nome_arquivo)
-        nome_arquivo = f"{base}_{timestamp}{ext}"
+        base, ext = os.path.splitext(nome_arquivo) # Separa nome e extensão
+        nome_arquivo = f"{base}_{timestamp}{ext}" # Novo nome com timestamp
 
-        # Caminho completo do arquivo dentro da pasta "downloads"
-        caminho_arquivo = os.path.join(pasta_destino, nome_arquivo)
+        # Caminho completo do arquivo dentro da pasta "downloadsRasp"
+        caminho_arquivo = os.path.join(pasta_destino, nome_arquivo) # Caminho completo do arquivo
 
-        with open(caminho_arquivo, "wb") as f:
+        with open(caminho_arquivo, "wb") as f: 
             for chunk in resposta.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
