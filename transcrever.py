@@ -1,90 +1,3 @@
-# import whisper  # Biblioteca para transcrição de áudio
-# import torch  # Biblioteca para computação em GPU
-# import os  # Biblioteca para manipulação de arquivos e diretórios
-# from datetime import datetime  # Biblioteca para manipulação de datas
-
-# def transcrever_com_nvidia(audio_path, modelo_tamanho="base"):
-#     # Função para transcrever áudio usando Whisper com suporte a GPU NVIDIA
-#     print("Iniciando transcrição com GPU NVIDIA...")
-    
-#     device = "cpu"  # Inicia com fallback para CPU
-#     # Tenta configurar o dispositivo para GPU NVIDIA
-#     if torch.cuda.is_available():
-#         print("GPU detectada. Usando CUDA.")
-#         device = "cuda"
-#     else:
-#         print("GPU NVIDIA não encontrada. Usando CPU.") 
-
-#     try:
-#         # Carrega o modelo no dispositivo detectado (GPU ou CPU)
-#         model = whisper.load_model(modelo_tamanho, device=device)
-        
-#         # Configurações otimizadas para evitar repetição
-#         resultado = model.transcribe(
-#             audio_path, 
-#             fp16=torch.cuda.is_available(),  # Usa fp16 apenas se CUDA estiver disponível
-#             language="pt",                   # Força português para melhor acurácia
-            
-#             # Parâmetros para evitar repetições e melhorar a qualidade
-#             # Fornece uma lista de temperaturas. O Whisper tentará cada uma
-#             # até encontrar uma que passe nos testes de compressão e probabilidade.
-#             temperature=(0.0, 0.2, 0.4, 0.6, 0.8),
-            
-#             # Limiar para a taxa de compressão. Ajuda a evitar texto sem sentido e repetitivo.
-#             compression_ratio_threshold=2.4,
-            
-#             # Limiar para a probabilidade média dos tokens. Evita frases com baixa confiança.
-#             logprob_threshold=-0.8,
-            
-#             best_of=5,                      # Aumentado para mais robustez
-#             verbose=True,                   # Mostra detalhes da transcrição
-#             beam_size=5                     # Usa beam search para melhor precisão
-#         )
-        
-#         return resultado
-        
-#     except Exception as e:
-#         print(f"Ocorreu um erro durante a transcrição: {e}")
-#         return {"text": f"Erro na transcrição: {e}"}
-
-# # Exemplo de uso
-# if __name__ == "__main__":
-#     # Configurações
-#     arquivo_audio = "testeWebcam.mp3"  # Caminho do seu arquivo de áudio
-#     modelo = "base"               # Tamanho do modelo: tiny, base, small, medium, large
-    
-#     # Executa a transcrição
-#     resultado = transcrever_com_nvidia(arquivo_audio, modelo)
-    
-#     # Extrai o texto transcrito
-#     texto_transcrito = resultado.get("text", "").strip()
-
-#     # Exibe os resultados
-#     print("\n" + "="*50) # Separador visual
-#     print("📄 TEXTO TRANSCRITO:") # Separador visual
-#     print("="*50) # Separador visual
-#     if texto_transcrito: # Verifica se há texto transcrito
-#         print(texto_transcrito) # Exibe o texto transcrito
-#     else: # Caso contrário, informa que não há texto
-#         print("Nenhum texto foi transcrito ou ocorreu um erro.") # Mensagem de erro
-        
-#     # Salva a transcrição em um arquivo de texto se houver conteúdo
-#     if texto_transcrito:
-#         try:
-#             # Cria um nome de arquivo com base na data e hora atuais para ser único
-#             data_atual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # Formato: YYYY-MM-DD_HH-MM-SS
-#             nome_arquivo = f"transcricao_{data_atual}.txt" # Nome do arquivo
-#             # Salva o texto transcrito em um arquivo de texto
-#             with open(nome_arquivo, "w", encoding="utf-8") as f: # Abre o arquivo para escrita
-#                 f.write(texto_transcrito) # Escreve o texto no arquivo
-                
-#             print(f"\n✅ Transcrição salva com sucesso no arquivo: {nome_arquivo}") # Mensagem de sucesso
-            
-#         except Exception as e: # Captura erros ao salvar o arquivo
-#             print(f"\n❌ Erro ao salvar o arquivo de transcrição: {e}") # Mensagem de erro ao salvar
-
-# códido do chatgpt para pegar o ultimo arquivo da pasta downloads.
-
 import whisper # Biblioteca para transcrição de áudio
 import torch # Biblioteca para computação em GPU
 import os # Biblioteca para manipulação de arquivos e diretórios
@@ -105,19 +18,31 @@ def baixar_arquivo(url, destino="download_raspberry"):
             print(f"❌ Erro ao conectar no servidor: {resposta.status_code}")
             return None
 
-        # Nome do arquivo
+        # Criar pasta "downloads" se não existir
+        pasta_destino = "downloads"
+        os.makedirs(pasta_destino, exist_ok=True)
+
+        # Nome base do arquivo
         nome_arquivo = destino
         if "content-disposition" in resposta.headers:
             # Se o servidor enviar cabeçalho com nome
             nome_arquivo = resposta.headers["content-disposition"].split("filename=")[-1].strip('"')
 
-        with open(nome_arquivo, "wb") as f:
+        # Adiciona data e hora ao nome do arquivo
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        base, ext = os.path.splitext(nome_arquivo)
+        nome_arquivo = f"{base}_{timestamp}{ext}"
+
+        # Caminho completo do arquivo dentro da pasta "downloads"
+        caminho_arquivo = os.path.join(pasta_destino, nome_arquivo)
+
+        with open(caminho_arquivo, "wb") as f:
             for chunk in resposta.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
 
-        print(f"✅ Download concluído: {nome_arquivo}")
-        return nome_arquivo
+        print(f"✅ Download concluído: {caminho_arquivo}")
+        return caminho_arquivo
     except Exception as e:
         print(f"❌ Erro durante o download: {e}")
         return None
