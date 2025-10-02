@@ -173,9 +173,10 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
-# Ignorar arquivos de áudio e texto
+# Ignorar arquivos de áudio e texto exceto o requirements.txt
 *.mp3
 *.txt
+!requirements.txt
 
 # Ignorar pastas específicas
 transcricoes/
