@@ -35,11 +35,11 @@ def baixar_arquivo(url, destino="download_raspberry"):
 
         # Caminho completo do arquivo dentro da pasta "downloadsRasp"
         caminho_arquivo = os.path.join(pasta_destino, nome_arquivo) # Caminho completo do arquivo
-
+        
         with open(caminho_arquivo, "wb") as f: 
             for chunk in resposta.iter_content(chunk_size=8192):
                 if chunk:
-                    f.write(chunk)
+                    f.write(chunk) 
 
         print(f"✅ Download concluído: {caminho_arquivo}")
         return caminho_arquivo
@@ -114,6 +114,7 @@ if __name__ == "__main__":
             resultado = transcrever_com_nvidia(arquivo, modelo)
             texto_transcrito = resultado.get("text", "").strip()
 
+
             print("\n" + "="*50)
             print("📄 TEXTO TRANSCRITO:")
             print("="*50)
@@ -126,9 +127,11 @@ if __name__ == "__main__":
                 try:
                     data_atual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                     nome_arquivo = f"transcricao_{data_atual}.txt"
-                    with open(nome_arquivo, "w", encoding="utf-8") as f:
+                    pasta_destino = "transcricoes" # Pasta para salvar os downloads
+                    caminho_arquivo = os.path.join(pasta_destino, nome_arquivo) # Caminho completo do arquivo
+                    with open(caminho_arquivo, "w", encoding="utf-8") as f:
                         f.write(texto_transcrito)
-                    print(f"\n✅ Transcrição salva com sucesso no arquivo: {nome_arquivo}")
+                    print(f"\n✅ Transcrição salva com sucesso no arquivo: {caminho_arquivo}")
                 except Exception as e:
                     print(f"\n❌ Erro ao salvar o arquivo de transcrição: {e}")
         else:

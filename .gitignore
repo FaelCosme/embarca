@@ -173,4 +173,13 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Ignorar arquivos de áudio e texto
+*.mp3
+*.txt
+
+# Ignorar pastas específicas
+transcricoes/
+downloadsRasp/
+
+
 # End of https://www.toptal.com/developers/gitignore/api/python
